@@ -6,44 +6,66 @@ import {
   FETCH_INFO_SUCCESS,
   FETCH_INFO_FAIL,
   FETCH_INFO_REQUEST,
-  SET_PAGE
+  SET_PAGE,
+  SET_PER_PAGE,
+  TOGGLE_TYPE
 } from './constants/actionTypes'
+import {
+  POKEMON,
+  TYPE
+} from './constants/fetchItemTypes'
 
 const defaultState = {
   list: [],
-  page: 1,
-  filterString: null,
-  filterTags: [],
+  currentPage: 1,
+  perPage: 20,
+  search: null,
+  types: [],
+  selectedType: null,
   isLoading: false,
-  isLoadingError: false,
   totalCount: 0
 }
 
 const app = (state = defaultState, action) => {
   switch (action.type) {
-    case FETCH_ITEMS_REQUEST:
-      return {
-        ...state,
-        isLoadingError: false
+    case FETCH_ITEMS_REQUEST: {
+      if (action.itemType === POKEMON) {
+        return {
+          ...state
+        }
       }
 
-    case FETCH_ITEMS_SUCCESS:
-      return {
-        ...state,
-        totalCount: action.count,
-        list: action.payload
+      return state
+    }
+
+    case FETCH_ITEMS_SUCCESS: {
+      if (action.itemType === POKEMON) {
+        return {
+          ...state,
+          totalCount: action.count,
+          list: action.payload
+        }
+      } else if (action.itemType === TYPE) {
+        return {
+          ...state,
+          types: action.payload
+        }
       }
 
-    case FETCH_ITEMS_FAIL:
-      return {
-        ...state,
-        isLoadingError: true
-      }
+      return state
+    }
 
     case SET_PAGE: {
       return {
         ...state,
         currentPage: action.payload
+      }
+    }
+
+    case SET_PER_PAGE: {
+      return {
+        ...state,
+        perPage: action.payload
       }
     }
 
@@ -71,6 +93,35 @@ const app = (state = defaultState, action) => {
           }
           return item
         })]
+      }
+    }
+
+    case FETCH_INFO_FAIL: {
+      return {
+        ...state,
+        list: [...state.list.map(item => {
+          if (item.url === action.url) {
+            item.isLoading = undefined
+          }
+          return item
+        })]
+      }
+    }
+
+    case TOGGLE_TYPE: {
+      if (state.selectedType !== null &&
+          state.selectedType === action.payload) {
+        return {
+          ...state,
+          selectedType: null,
+          currentPage: 1
+        }
+      } else {
+        return {
+          ...state,
+          selectedType: action.payload,
+          currentPage: 1
+        }
       }
     }
 

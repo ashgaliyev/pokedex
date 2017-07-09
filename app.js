@@ -7,8 +7,14 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var pokemon = require('./routes/pokemon');
+var type = require('./routes/type');
+
+var apicache = require('apicache')
 
 var app = express();
+var cache = apicache.middleware;
+
+app.use(cache('30 minutes'))
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -24,6 +30,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/pokemon', pokemon);
+app.use('/type', type);
+
+// add route to manually clear target/group
+app.get('/api/cache/clear/:target?', (req, res) => {
+  res.json(apicache.clear(req.params.target))
+})
+
+// add route to display cache index
+app.get('/api/cache/index', (req, res) => {
+  res.json(apicache.getIndex())
+})
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

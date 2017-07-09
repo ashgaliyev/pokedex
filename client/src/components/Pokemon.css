@@ -11,6 +11,7 @@
   margin-right: auto;
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.17);
   border-radius: 2px;
+  min-height:100px;
 }
 
 .pokemon .col:first-child {
@@ -33,4 +34,18 @@
 .pokemon .col:last-child ul {
   margin: 0;
   padding-left: 20px;
+}
+
+.pokemon .loading {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-self: center;
+}
+
+.pokemon .load-fail {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  align-items: center;
 }

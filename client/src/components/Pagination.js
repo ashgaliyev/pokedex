@@ -1,17 +1,23 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { SET_PAGE } from '../constants/actionTypes'
+import ReactPaginate from 'react-paginate'
+import {
+  changePageAndFetchPokemons,
+  changePerPage
+} from '../api/pokemon'
+import './Pagination.css'
 
 const mapDispatchToProps = dispatch => ({
-  onSetPage: (page) => dispatch(SET_PAGE, page)
+  changePage: (page) => dispatch(changePageAndFetchPokemons(page)),
+  changePerPage: (pp) => dispatch(changePerPage(pp))
 })
 
-const getPagesCount = itemsCount => {
+const getPagesCount = (itemsCount, perPage) => {
   let pagesCount = 0
   let remain = itemsCount
 
-  while (remain >= 10) {
-    if (remain % 10 === 0) {
+  while (remain >= perPage) {
+    if (remain % perPage === 0) {
       pagesCount++
     }
     remain--
@@ -19,26 +25,52 @@ const getPagesCount = itemsCount => {
   return pagesCount
 }
 
+const PerPage = ({ onPerPageSelect, currentPerPage }) => {
+  return (
+    <div className='per-page'>
+      <span>Per page:</span>
+      <ul>
+        {Array(3).fill().map((_, i) => {
+          const perPage = (i + 1) * 10
+          return (
+            <li
+              key={i}
+              className={(currentPerPage === perPage ? 'selected' : '')}
+            >
+              <a
+                onClick={() => onPerPageSelect(perPage)}
+                key={i}>{perPage}</a>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
 const Pagination = props => {
-  if (!props.itemsCount || props.itemsCount <= 10) {
+  if (!props.itemsCount || props.itemsCount <= props.perPage) {
     return null
   }
 
   const currentPage = typeof props.currentPage === 'undefined' ? 1 : props.currentPage
 
-  const pagesCount = getPagesCount(props.itemsCount)
+  const pagesCount = getPagesCount(props.itemsCount, props.perPage)
 
   return (
-    <ul className='pagination'>
-      {[...(new Array(pagesCount).fill())].map((_, i) => {
-        const page = i + 1
-        if (page === currentPage) {
-          return <li key={page} className='active'>{page}</li>
-        } else {
-          return <li key={page} onClick={() => props.onSetPage(page)}>{page}</li>
-        }
-      })}
-    </ul>
+    <div className='pagination-wrapper'>
+      <PerPage
+        onPerPageSelect={(p) => props.changePerPage(p)}
+        currentPerPage={props.perPage}
+      />
+      <ReactPaginate
+        containerClassName='pagination'
+        initialPage={(currentPage - 1)}
+        pageCount={pagesCount}
+        pageRangeDisplayed={2}
+        marginPagesDisplayed={2}
+        onPageChange={(e) => props.changePage(e.selected + 1)}
+      />
+    </div>
   )
 }
 

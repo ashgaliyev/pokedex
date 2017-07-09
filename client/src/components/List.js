@@ -14,12 +14,13 @@ const List = props => {
   return (
     <div className="list">
       {props.items.map((item) => (
-        <Pokemon info={item} />
+        <Pokemon info={item} onRepeat={this.props.onRepeat} />
       ))}
 
       <Pagination
         itemsCount={props.itemsCount}
         currentPage={props.currentPage}
+        perPage={props.perPage}
       />
     </div>
   )
