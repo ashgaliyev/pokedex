@@ -14,7 +14,7 @@ var apicache = require('apicache')
 var app = express();
 var cache = apicache.middleware;
 
-app.use(cache('30 minutes'))
+app.use(cache('1 day'))
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
