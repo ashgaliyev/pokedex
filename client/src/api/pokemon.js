@@ -7,24 +7,52 @@ import {
   FETCH_INFO_REQUEST,
   SET_PER_PAGE,
   TOGGLE_TYPE,
-  SET_PAGE
+  SET_PAGE,
+  RESET_SEARCH,
+  SEARCH
 } from '../constants/actionTypes'
 import {
-  POKEMON,
-  TYPE
+  POKEMON
 } from '../constants/fetchItemTypes'
 import store from '../store'
+import {
+  LOAD_FAILED
+} from '../constants/loadState'
 
 function fetchPokemons (dispatch) {
   const { currentPage, perPage, selectedType } = store.getState().app
 
   if (selectedType !== null) {
-    dispatch({ type: FETCH_ITEMS_REQUEST, itemType: TYPE })
+    dispatch({ type: FETCH_ITEMS_REQUEST, itemType: POKEMON })
     return fetch(`/type/${selectedType}/?page=${currentPage}&limit=${perPage}`)
   } else {
     dispatch({ type: FETCH_ITEMS_REQUEST, itemType: POKEMON })
     return fetch(`/pokemon/?page=${currentPage}&limit=${perPage}`)
   }
+}
+
+function searchPokemon (dispatch, name) {
+  dispatch({ type: FETCH_INFO_REQUEST, itemType: POKEMON })
+  return fetch(`/pokemon/${name}`)
+    .then(response => response.json())
+    .then(json => {
+      if (typeof json.detail !== 'undefined') {
+        if (json.detail === 'Not found.') {
+          dispatch({
+            type: FETCH_INFO_SUCCESS,
+            url: null,
+            payload: null
+          })
+          return
+        }
+      }
+
+      dispatch({
+        type: FETCH_INFO_SUCCESS,
+        url: null,
+        payload: json
+      })
+    })
 }
 
 function fetchInfo (dispatch, url) {
@@ -39,6 +67,25 @@ function fetchInfo (dispatch, url) {
       })
     )
     .catch(() => dispatch({ type: FETCH_INFO_FAIL, url }))
+}
+
+export function reloadInfo () {
+  return (dispatch, getState) => {
+    var state = getState()
+
+    const { list } = state.app
+
+    if (list === null) {
+      return
+    }
+
+    list.map((item) => {
+      if (item.loadState === LOAD_FAILED) {
+        fetchInfo(dispatch, item.url)
+      }
+      return item
+    })
+  }
 }
 
 export function fetchAllInfo (dispatch) {
@@ -64,12 +111,25 @@ export function fetchAllInfo (dispatch) {
       })
 
       modify.map((item) => {
-        if (typeof item.isLoading === 'undefined') {
-          fetchInfo(dispatch, item.url)
-        }
+        fetchInfo(dispatch, item.url)
+        return item
       })
     })
     .catch(() => dispatch({ type: FETCH_ITEMS_FAIL, itemType: POKEMON }))
+}
+
+export function resetSearchAndFetchPokemon () {
+  return dispatch => {
+    dispatch({ type: RESET_SEARCH })
+    return fetchAllInfo(dispatch)
+  }
+}
+
+export function changeSearchAndFetchPokemon (str) {
+  return dispatch => {
+    dispatch({ type: SEARCH, payload: str })
+    return searchPokemon(dispatch, str)
+  }
 }
 
 export function changePageAndFetchPokemons (page) {

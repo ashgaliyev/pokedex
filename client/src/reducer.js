@@ -5,15 +5,20 @@ import {
   FETCH_ITEMS_FAIL,
   FETCH_INFO_SUCCESS,
   FETCH_INFO_FAIL,
-  FETCH_INFO_REQUEST,
   SET_PAGE,
   SET_PER_PAGE,
+  SEARCH,
   TOGGLE_TYPE
 } from './constants/actionTypes'
 import {
   POKEMON,
   TYPE
 } from './constants/fetchItemTypes'
+import {
+  LOADING,
+  LOADED,
+  LOAD_FAILED
+} from './constants/loadState'
 
 const defaultState = {
   list: [],
@@ -22,7 +27,7 @@ const defaultState = {
   search: null,
   types: [],
   selectedType: null,
-  isLoading: false,
+  loadState: LOADING,
   totalCount: 0
 }
 
@@ -31,7 +36,8 @@ const app = (state = defaultState, action) => {
     case FETCH_ITEMS_REQUEST: {
       if (action.itemType === POKEMON) {
         return {
-          ...state
+          ...state,
+          loadState: LOADING
         }
       }
 
@@ -43,12 +49,24 @@ const app = (state = defaultState, action) => {
         return {
           ...state,
           totalCount: action.count,
-          list: action.payload
+          list: action.payload.map((i) => ({ ...i, loadState: LOADING })),
+          loadState: LOADED
         }
       } else if (action.itemType === TYPE) {
         return {
           ...state,
           types: action.payload
+        }
+      }
+
+      return state
+    }
+
+    case FETCH_ITEMS_FAIL: {
+      if (action.itemType === POKEMON) {
+        return {
+          ...state,
+          loadState: LOAD_FAILED
         }
       }
 
@@ -69,30 +87,46 @@ const app = (state = defaultState, action) => {
       }
     }
 
-    case FETCH_INFO_REQUEST: {
-      return {
-        ...state,
-        list: [...state.list.map(item => {
-          if (item.url === action.url) {
-            item.isLoading = true
-          }
-          return item
-        })]
-      }
-    }
-
     case FETCH_INFO_SUCCESS: {
-      return {
-        ...state,
-        list: [...state.list.map(item => {
-          if (item.url === action.url) {
-            item.img = action.payload.sprites.front_shiny
-            item.desc = [
+      if (state.list.length === 0) {
+        if (action.payload !== null) {
+          const item = {
+            name: action.payload.name,
+            url: action.payload.url,
+            loadState: LOADED,
+            img: action.payload.sprites.front_shiny,
+            desc: [
               'Weight: ' + action.payload.weight
             ]
           }
-          return item
-        })]
+          return {
+            ...state,
+            list: [ item ],
+            loadState: LOADED,
+            totalCount: 1
+          }
+        } else {
+          return {
+            ...state,
+            list: [],
+            loadState: LOADED,
+            totalCount: 0
+          }
+        }
+      } else {
+        return {
+          ...state,
+          list: [...state.list.map(item => {
+            if (item.url === action.url) {
+              item.loadState = LOADED
+              item.img = action.payload.sprites.front_shiny
+              item.desc = [
+                'Weight: ' + action.payload.weight
+              ]
+            }
+            return item
+          })]
+        }
       }
     }
 
@@ -101,7 +135,7 @@ const app = (state = defaultState, action) => {
         ...state,
         list: [...state.list.map(item => {
           if (item.url === action.url) {
-            item.isLoading = undefined
+            item.loadState = LOAD_FAILED
           }
           return item
         })]
@@ -122,6 +156,15 @@ const app = (state = defaultState, action) => {
           selectedType: action.payload,
           currentPage: 1
         }
+      }
+    }
+
+    case SEARCH: {
+      return {
+        ...state,
+        list: [],
+        loadState: LOADING,
+        selectedType: null
       }
     }
 

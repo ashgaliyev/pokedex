@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import {
   toggleTypeAndFetchPokemons
 } from '../api/pokemon'
+import './TypesSelector.css'
 
 const TypesSelector = ({ onSelect, types, selected }) => (
   <div className='types-selector'>

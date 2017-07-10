@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import ReactPaginate from 'react-paginate'
 import {
@@ -47,31 +47,55 @@ const PerPage = ({ onPerPageSelect, currentPerPage }) => {
     </div>
   )
 }
-const Pagination = props => {
-  if (!props.itemsCount || props.itemsCount <= props.perPage) {
-    return null
+
+class Pagination extends Component {
+  constructor (props) {
+    super(props)
+
+    const currentPage = typeof props.currentPage === 'undefined' ? 1 : props.currentPage
+
+    this.state = {
+      page: currentPage
+    }
+
+    this.handleChangePage = this.handleChangePage.bind(this)
   }
 
-  const currentPage = typeof props.currentPage === 'undefined' ? 1 : props.currentPage
+  handleChangePage (p) {
+    if (p !== this.state.page) {
+      this.setState({ page: p })
+      this.props.changePage(p)
+    }
+  }
 
-  const pagesCount = getPagesCount(props.itemsCount, props.perPage)
+  render () {
+    const props = this.props
 
-  return (
-    <div className='pagination-wrapper'>
-      <PerPage
-        onPerPageSelect={(p) => props.changePerPage(p)}
-        currentPerPage={props.perPage}
-      />
-      <ReactPaginate
-        containerClassName='pagination'
-        initialPage={(currentPage - 1)}
-        pageCount={pagesCount}
-        pageRangeDisplayed={2}
-        marginPagesDisplayed={2}
-        onPageChange={(e) => props.changePage(e.selected + 1)}
-      />
-    </div>
-  )
+    if (!props.itemsCount || props.itemsCount <= props.perPage) {
+      return null
+    }
+
+    const pagesCount = getPagesCount(props.itemsCount, props.perPage)
+
+    const currentPage = this.state.page
+
+    return (
+      <div className='pagination-wrapper'>
+        <PerPage
+          onPerPageSelect={(p) => props.changePerPage(p)}
+          currentPerPage={props.perPage}
+        />
+        <ReactPaginate
+          containerClassName='pagination'
+          initialPage={(currentPage - 1)}
+          pageCount={pagesCount}
+          pageRangeDisplayed={2}
+          marginPagesDisplayed={2}
+          onPageChange={(e) => this.handleChangePage(e.selected + 1)}
+        />
+      </div>
+    )
+  }
 }
 
 export default connect(() => ({}), mapDispatchToProps)(Pagination)

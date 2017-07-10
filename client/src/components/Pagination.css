@@ -40,5 +40,9 @@
 }
 
 .pagination {
-    margin-bottom: 20px;
+    margin-bottom: 50px !important;
+}
+
+.pagination .previous, .pagination .next {
+    max-width:100px;
 }

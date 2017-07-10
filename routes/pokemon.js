@@ -10,7 +10,6 @@ router.get('/:id', function(req, res, next) {
    })
 });
 
-
 /* GET pokemon listing. */
 router.get('/', function(req, res, next) {
 

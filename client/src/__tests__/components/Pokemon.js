@@ -4,6 +4,10 @@ import { shallow, mount } from 'enzyme'
 import Pokemon, { Title, Description, Image } from '../../components/Pokemon.js'
 import { Provider } from 'react-redux'
 import store from '../../store'
+import {
+  LOADING,
+  LOAD_FAILED
+} from '../../constants/loadState'
 
 describe('Pokemon', () => {
   it('renders without crashing', () => {
@@ -25,10 +29,9 @@ describe('Pokemon', () => {
       ]
     }
     const wrapper = mount(<Pokemon info={info} />)
+    console.log(wrapper.debug())
     expect(wrapper.containsAllMatchingElements([
-      <Image />,
-      <Title />,
-      <Description />
+      <Image url='testurl' title='Baltasaur' />
     ])).toEqual(true)
   })
 
@@ -36,7 +39,7 @@ describe('Pokemon', () => {
     const info = {
       name: 'Baltasaur',
       url: '',
-      isLoading: true
+      loadState: LOADING
     }
     const wrapper = shallow(<Pokemon info={info} />)
     expect(wrapper.contains(
@@ -47,7 +50,8 @@ describe('Pokemon', () => {
   it('should display repeat, if fails to load', () => {
     const info = {
       name: 'Baltasaur',
-      url: ''
+      url: '',
+      loadState: LOAD_FAILED
     }
     const wrapper = shallow(<Pokemon info={info} />)
     expect(wrapper.contains(

@@ -1,13 +1,11 @@
 import {
   FETCH_ITEMS_SUCCESS,
   FETCH_ITEMS_FAIL,
-  FETCH_ITEMS_REQUEST,
-  TOGGLE_TYPE
+  FETCH_ITEMS_REQUEST
 } from '../constants/actionTypes'
 import {
   TYPE
 } from '../constants/fetchItemTypes'
-import store from '../store'
 
 function fetchTypesRequest (dispatch) {
   dispatch({ type: FETCH_ITEMS_REQUEST, itemType: TYPE })

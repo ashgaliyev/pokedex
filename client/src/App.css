@@ -22,3 +22,35 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.content {
+    display: flex;
+    max-width:800px;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap:wrap;
+    margin: 0 auto;
+}
+.content .col-left {
+    flex-grow:1;
+    flex-basis:auto;
+    max-width:200px;
+}
+.content .col-right {
+    flex-grow:1;
+    flex-shrink:1;
+    flex-basis:auto;
+}
+.header {
+  margin: 20px auto;
+  max-width:800px;
+}
+.search-wrapper {display: flex; margin: 0 auto;}
+.search-wrapper input { flex: 10; }
+.search-wrapper button { flex: 4; }
+
+@media (max-width: 937px) {
+  .content .col-left {
+    max-width: 100%;
+  }
+}
